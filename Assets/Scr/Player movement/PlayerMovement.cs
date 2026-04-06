@@ -4,25 +4,32 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     private Vector3 _velocity;
-    private InputAction moveAction;
-    private InputAction interactAction;
+    private Rigidbody _rb;
+    private InputAction _moveAction;
+    private InputAction _interactAction;
     public float movementSpeed = 10f;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        moveAction = InputSystem.actions.FindAction("Move");
-        interactAction = InputSystem.actions.FindAction("Interact");
+        _rb = GetComponent<Rigidbody>();
+        _rb.freezeRotation = true;
+        _moveAction = InputSystem.actions.FindAction("Move");
+        _interactAction = InputSystem.actions.FindAction("Interact");
         _velocity = new Vector3(.1f, .1f, .1f);
+        
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        Vector2 moveValue = moveAction.ReadValue<Vector2>();
-        transform.position += new Vector3(moveValue.x * movementSpeed * Time.deltaTime, 0, moveValue.y * movementSpeed * Time.deltaTime);
+        Vector2 moveValue = _moveAction.ReadValue<Vector2>();
+        Vector3 playerVelocity = transform.forward * moveValue.y + transform.right * moveValue.x;
+        _rb.AddForce(playerVelocity.normalized * movementSpeed, ForceMode.Force);
+        
+        
         // transform.position += _velocity;
-        if (interactAction.WasPressedThisFrame())
+        if (_interactAction.WasPressedThisFrame())
         {
             Debug.Log("Move Value: " + moveValue);
         }
